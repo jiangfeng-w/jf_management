@@ -40,7 +40,6 @@
             <!-- 用户表格 -->
             <el-table
                 :data="userList"
-                style="width: 100%"
                 border
                 stripe
             >
@@ -88,12 +87,16 @@
                 </el-table-column>
 
                 <!-- 操作列 -->
-                <el-table-column label="操作">
+                <el-table-column
+                    label="操作"
+                    min-width="175px"
+                    max-width="175px"
+                >
                     <template v-slot="scope">
                         <!-- 编辑按钮 -->
                         <el-tooltip
                             effect="dark"
-                            content="编辑信息"
+                            content="编辑用户"
                             placement="top"
                             :enterable="false"
                         >
@@ -109,7 +112,7 @@
                         <!-- 删除按钮 -->
                         <el-tooltip
                             effect="dark"
-                            content="删除信息"
+                            content="删除用户"
                             placement="top"
                             :enterable="false"
                         >
@@ -133,6 +136,7 @@
                                 type="warning"
                                 icon="el-icon-setting"
                                 size="mini"
+                                @click="showSetRoleDialog(scope.row)"
                                 round
                             ></el-button>
                         </el-tooltip>
@@ -156,15 +160,14 @@
                 title="添加用户"
                 :visible.sync="addDialog"
                 width="30%"
-                @close="closeAddDialog"
+                @closed="closeAddDialog"
             >
                 <!-- 内容区域 -->
                 <el-form
                     ref="addUserRef"
                     :model="addUserForm"
                     :rules="addUserRules"
-                    label-width="80px"
-                    class="add_user_form"
+                    label-width="100px"
                     status-icon
                 >
                     <!-- 用户名 -->
@@ -228,7 +231,7 @@
             <el-dialog
                 title="修改用户信息"
                 :visible.sync="editDialog"
-                @close="closeEditDialog"
+                @closed="closeEditDialog"
                 width="30%"
             >
                 <!-- 内容区域 -->
@@ -236,8 +239,7 @@
                     ref="editUserRef"
                     :model="editUserForm"
                     :rules="editUserRules"
-                    label-width="80px"
-                    class="add_user_form"
+                    label-width="100px"
                     status-icon
                 >
                     <!-- 用户名 -->
@@ -283,6 +285,69 @@
                     </el-button>
                 </span>
             </el-dialog>
+
+            <!-- 分配用户角色的对话框 -->
+            <el-dialog
+                title="修改用户角色"
+                :visible.sync="setRoleDialog"
+                @closed="closeSetRoleDialog"
+                width="30%"
+            >
+                <!-- 内容区域 -->
+                <el-form
+                    :model="setRolesForm"
+                    label-width="100px"
+                    status-icon
+                >
+                    <!-- 当前的用户 -->
+                    <el-form-item label="当前用户名称">
+                        <el-input
+                            prefix-icon="el-icon-user"
+                            v-model="setRolesForm.username"
+                            disabled
+                        ></el-input>
+                    </el-form-item>
+
+                    <!-- 当前的用户的角色 -->
+                    <el-form-item label="当前用户角色">
+                        <el-input
+                            prefix-icon="el-icon-user"
+                            v-model="setRolesForm.role_name"
+                            disabled
+                        ></el-input>
+                    </el-form-item>
+
+                    <!-- 分配的新角色 -->
+                    <el-form-item label="选择新的角色">
+                        <el-select
+                            prefix-icon="el-icon-user"
+                            placeholder="请选择新角色"
+                            clearable
+                            v-model="selectRoleId"
+                        >
+                            <el-option
+                                v-for="(role, index) in rolesList"
+                                :key="role.id"
+                                :label="role.roleName"
+                                :value="role.id"
+                            ></el-option>
+                        </el-select>
+                    </el-form-item>
+                </el-form>
+                <!-- 按钮区域 -->
+                <span
+                    slot="footer"
+                    class="dialog-footer"
+                >
+                    <el-button @click="setRoleDialog = false">取 消</el-button>
+                    <el-button
+                        type="primary"
+                        @click="setRole"
+                    >
+                        确 定
+                    </el-button>
+                </span>
+            </el-dialog>
         </el-card>
     </div>
 </template>
@@ -305,8 +370,7 @@
             // 电话校验规则
             var checkTel = (rule, value, callback) => {
                 // 正则
-                const reg =
-                    /^(?:(?:\+|00)86)?1(?:(?:3[\d])|(?:4[5-79])|(?:5[0-35-9])|(?:6[5-7])|(?:7[0-8])|(?:8[\d])|(?:9[189]))\d{8}$/
+                const reg = /^(?:(?:\+|00)86)?1[3-9]\d{9}$/
 
                 if (!reg.test(value)) {
                     return callback(new Error('请输入正确的手机号'))
@@ -377,6 +441,15 @@
                         { validator: checkTel, trigger: 'blur' },
                     ],
                 },
+
+                // 控制分配用户角色的对话框的显示 / 隐藏
+                setRoleDialog: false,
+                // 配用户角色的表单
+                setRolesForm: {},
+                // 所有角色列表
+                rolesList: [],
+                // 新角色的id
+                selectRoleId: '',
             }
         },
         methods: {
@@ -395,14 +468,22 @@
                             type: 'error',
                             duration: 1000,
                         })
-                    this.$message({
-                        message: '获取管理员列表成功',
-                        type: 'success',
-                        duration: 1000,
-                    })
                     this.userList = data.data.users
                     this.total = data.data.total
                 })
+            },
+            // 获取角色列表
+            async getRolesList() {
+                const { data: res } = await this.$axios.get('roles')
+                if (res.meta.status !== 200) {
+                    return this.$message({
+                        message: '获取角色列表失败',
+                        type: 'error',
+                        duration: 1000,
+                    })
+                }
+                this.rolesList = res.data
+                // console.log(this.rolesList)
             },
             //用户状态改变
             changeStatus(user) {
@@ -465,12 +546,13 @@
                             // console.log(res.data)
                             if (res.data.meta.status !== 201) {
                                 // 状态码为400，用户名已存在
-                                if (res.data.meta.status === 400)
+                                if (res.data.meta.status === 400) {
                                     return this.$message({
                                         message: res.data.meta.msg,
                                         type: 'error',
                                         duration: 1000,
                                     })
+                                }
                                 return this.$message({
                                     message: '用户添加失败',
                                     type: 'error',
@@ -496,7 +578,7 @@
             },
 
             // 用户操作
-            // 关闭添加对话框时重置表单
+            // 关闭编辑对话框时重置表单
             closeEditDialog() {
                 this.$refs.editUserRef.resetFields()
             },
@@ -504,12 +586,8 @@
             showEditDialog(user) {
                 this.editDialog = true
                 // console.log(user)
-                // this.editUserForm.id = user.id
-                // this.editUserForm.username = user.username
-                // this.editUserForm.email = user.email
-                // this.editUserForm.mobile = user.mobile
 
-                // 从服务端获取信息
+                // 从服务端获取最新信息
                 this.$axios({
                     method: 'get',
                     url: `users/${user.id}`,
@@ -542,7 +620,7 @@
                             // console.log(res.data)
                             if (res.data.meta.status !== 200) {
                                 return this.$message({
-                                    message: '更新用户更新失败',
+                                    message: res.data.meta.msg,
                                     type: 'error',
                                     duration: 1000,
                                 })
@@ -579,7 +657,7 @@
                                 // console.log(res)
                                 if (res.data.meta.status !== 200)
                                     return this.$message({
-                                        message: '用户删除失败',
+                                        message: res.data.meta.msg,
                                         type: 'error',
                                         duration: 1000,
                                     })
@@ -607,9 +685,53 @@
                         })
                     })
             },
+
+            // 关闭修改用户角色对话框
+            closeSetRoleDialog() {
+                this.selectRoleId = ''
+                this.setRolesForm = ''
+            },
+            // 修改用户角色
+            showSetRoleDialog(user) {
+                this.setRoleDialog = true
+                this.setRolesForm = user
+            },
+            // 发起请求设置用户角色
+            setRole() {
+                this.setRoleDialog = false
+                // 如果没有选择新角色，直接关闭对话框
+                if (!this.selectRoleId) {
+                    return
+                }
+                // 选择了新角色，发起请求
+                this.$axios({
+                    method: 'put',
+                    url: `users/${this.setRolesForm.id}/role`,
+                    data: {
+                        rid: this.selectRoleId,
+                    },
+                }).then(res => {
+                    // console.log(res.data)
+                    if (res.data.meta.status !== 200) {
+                        return this.$message({
+                            message: res.data.meta.msg,
+                            type: 'error',
+                            duration: 1000,
+                        })
+                    }
+                    this.$message({
+                        message: '修改用户角色成功',
+                        type: 'success',
+                        duration: 1000,
+                    })
+
+                    this.getUserList()
+                })
+            },
         },
         created() {
             this.getUserList()
+            this.getRolesList()
         },
     }
 </script>

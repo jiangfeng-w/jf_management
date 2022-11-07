@@ -35,7 +35,10 @@
                     router
                     :default-active="$router.currentRoute.name"
                 >
-                    <el-menu-item index="welcome">
+                    <el-menu-item
+                        index="welcome"
+                        @select="selectWel"
+                    >
                         <i class="el-icon-star-on"></i>
                         <span slot="title">欢迎</span>
                     </el-menu-item>
@@ -130,6 +133,9 @@
             // 折叠菜单
             toggleCollapse() {
                 this.isCollapse = !this.isCollapse
+            },
+            selectWel(index, path) {
+                console.log(index)
             },
         },
         created() {
