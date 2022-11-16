@@ -9,6 +9,14 @@
                 />
                 <span>电商管理系统</span>
             </div>
+
+            <!-- 折叠按钮 -->
+            <i
+                class="toggle-button el-icon-s-fold"
+                @click="toggleCollapse"
+            ></i>
+
+            <!-- 退出登录 -->
             <el-button
                 type="info"
                 @click="toLogout"
@@ -16,16 +24,10 @@
                 退出登录
             </el-button>
         </el-header>
+
         <el-container>
             <!-- 侧边导航栏 -->
             <el-aside :width="isCollapse ? '64px' : '180px'">
-                <!-- 折叠按钮 -->
-                <div
-                    class="toggle-button"
-                    @click="toggleCollapse"
-                >
-                    | | |
-                </div>
                 <el-menu
                     background-color="#313743"
                     text-color="#fff"
@@ -38,8 +40,9 @@
                     <el-menu-item
                         index="welcome"
                         @select="selectWel"
+                        class="welcome"
                     >
-                        <i class="el-icon-star-on"></i>
+                        <i class="el-icon-star-on wel_icon"></i>
                         <span slot="title">欢迎</span>
                     </el-menu-item>
 
@@ -167,23 +170,18 @@
                 cursor: pointer;
             }
         }
+        .toggle-button {
+            position: absolute;
+            font-size: 25px;
+            margin-left: 220px;
+            cursor: pointer;
+        }
     }
     .el-aside {
         background-color: #313743;
         color: #fff;
-        transition: 0.5s;
         .el-menu {
             border-right: none;
-        }
-
-        .toggle-button {
-            width: 100%;
-            color: #fff;
-            font-size: 12px;
-            line-height: 20px;
-            text-align: center;
-            height: 20px;
-            cursor: pointer;
         }
     }
     .el-aside::-webkit-scrollbar {

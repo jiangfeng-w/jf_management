@@ -12,3 +12,10 @@ body,
 .el-breadcrumb {
     margin-bottom: 25px;
 }
+
+/* ::-webkit-scrollbar {
+    display: none;
+} */
+body {
+    /* overflow-y: hidden; */
+}

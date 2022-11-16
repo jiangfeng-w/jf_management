@@ -389,7 +389,18 @@
                             this.getRolesList()
                         })
                         .catch(err => {
-                            console.log(err)
+                            if (err.code === 'ERR_NETWORK') {
+                                return this.$message({
+                                    message: '网络错误，请检查网络后重试',
+                                    type: 'error',
+                                    duration: 1000,
+                                })
+                            }
+                            this.$message({
+                                message: err.message,
+                                type: 'error',
+                                duration: 1000,
+                            })
                         })
                 })
             },
@@ -431,22 +442,37 @@
                             roleName: this.editRolesForm.roleName,
                             roleDesc: this.editRolesForm.roleDesc,
                         },
-                    }).then(res => {
-                        // console.log(res.data)
-                        if (res.data.meta.status !== 200) {
-                            return this.$message({
-                                message: res.data.meta.msg,
+                    })
+                        .then(res => {
+                            // console.log(res.data)
+                            if (res.data.meta.status !== 200) {
+                                return this.$message({
+                                    message: res.data.meta.msg,
+                                    type: 'error',
+                                    duration: 1000,
+                                })
+                            }
+                            this.$message({
+                                message: '修改角色信息成功',
+                                type: 'success',
+                                duration: 1000,
+                            })
+                            this.getRolesList()
+                        })
+                        .catch(err => {
+                            if (err.code === 'ERR_NETWORK') {
+                                return this.$message({
+                                    message: '网络错误，请检查网络后重试',
+                                    type: 'error',
+                                    duration: 1000,
+                                })
+                            }
+                            this.$message({
+                                message: err.message,
                                 type: 'error',
                                 duration: 1000,
                             })
-                        }
-                        this.$message({
-                            message: '修改角色信息成功',
-                            type: 'success',
-                            duration: 1000,
                         })
-                        this.getRolesList()
-                    })
                 })
             },
             // 删除角色
@@ -478,12 +504,18 @@
                                 this.getRolesList()
                             })
                             .catch(err => {
+                                if (err.code === 'ERR_NETWORK') {
+                                    return this.$message({
+                                        message: '网络错误，请检查网络后重试',
+                                        type: 'error',
+                                        duration: 1000,
+                                    })
+                                }
                                 this.$message({
-                                    message: '用户删除失败',
+                                    message: err.message,
                                     type: 'error',
                                     duration: 1000,
                                 })
-                                console.log(err)
                             })
                     })
                     .catch(() => {
@@ -526,12 +558,18 @@
                                 role.children = res.data.data
                             })
                             .catch(err => {
+                                if (err.code === 'ERR_NETWORK') {
+                                    return this.$message({
+                                        message: '网络错误，请检查网络后重试',
+                                        type: 'error',
+                                        duration: 1000,
+                                    })
+                                }
                                 this.$message({
-                                    message: '权限移除失败',
+                                    message: err.message,
                                     type: 'error',
                                     duration: 1000,
                                 })
-                                console.log(err)
                             })
                     })
                     .catch(() => {
@@ -611,6 +649,13 @@
                         this.getRolesList()
                     })
                     .catch(err => {
+                        if (err.code === 'ERR_NETWORK') {
+                            return this.$message({
+                                message: '网络错误，请检查网络后重试',
+                                type: 'error',
+                                duration: 1000,
+                            })
+                        }
                         this.$message({
                             message: err.message,
                             type: 'error',

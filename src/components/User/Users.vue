@@ -7,6 +7,7 @@
             <el-breadcrumb-item>用户列表</el-breadcrumb-item>
         </el-breadcrumb>
 
+        <!-- 卡片区 -->
         <el-card>
             <!-- 添加与搜索 -->
             <el-row :gutter="20">
@@ -425,7 +426,7 @@
                     ],
                 },
 
-                // 编辑添加用户对话框隐藏或显示
+                // 编辑用户对话框隐藏或显示
                 editDialog: false,
                 // 编辑用户的表单
                 editUserForm: {},
@@ -509,7 +510,18 @@
                         })
                     })
                     .catch(err => {
-                        console.log(err)
+                        if (err.code === 'ERR_NETWORK') {
+                            return this.$message({
+                                message: '网络错误，请检查网络后重试',
+                                type: 'error',
+                                duration: 1000,
+                            })
+                        }
+                        this.$message({
+                            message: err.message,
+                            type: 'error',
+                            duration: 1000,
+                        })
                     })
             },
             // 筛选用户
@@ -568,7 +580,18 @@
                             this.getUserList()
                         })
                         .catch(err => {
-                            console.log(err)
+                            if (err.code === 'ERR_NETWORK') {
+                                return this.$message({
+                                    message: '网络错误，请检查网络后重试',
+                                    type: 'error',
+                                    duration: 1000,
+                                })
+                            }
+                            this.$message({
+                                message: err.message,
+                                type: 'error',
+                                duration: 1000,
+                            })
                         })
                 })
             },
@@ -634,7 +657,18 @@
                             this.getUserList()
                         })
                         .catch(err => {
-                            console.log(err)
+                            if (err.code === 'ERR_NETWORK') {
+                                return this.$message({
+                                    message: '网络错误，请检查网络后重试',
+                                    type: 'error',
+                                    duration: 1000,
+                                })
+                            }
+                            this.$message({
+                                message: err.message,
+                                type: 'error',
+                                duration: 1000,
+                            })
                         })
                 })
             },
@@ -670,12 +704,18 @@
                                 this.getUserList()
                             })
                             .catch(err => {
+                                if (err.code === 'ERR_NETWORK') {
+                                    return this.$message({
+                                        message: '网络错误，请检查网络后重试',
+                                        type: 'error',
+                                        duration: 1000,
+                                    })
+                                }
                                 this.$message({
-                                    message: '用户删除失败',
+                                    message: err.message,
                                     type: 'error',
                                     duration: 1000,
                                 })
-                                console.log(err)
                             })
                     })
                     .catch(() => {
@@ -689,7 +729,7 @@
             // 关闭修改用户角色对话框
             closeSetRoleDialog() {
                 this.selectRoleId = ''
-                this.setRolesForm = ''
+                this.setRolesForm = {}
             },
             // 修改用户角色
             showSetRoleDialog(user) {
@@ -710,23 +750,38 @@
                     data: {
                         rid: this.selectRoleId,
                     },
-                }).then(res => {
-                    // console.log(res.data)
-                    if (res.data.meta.status !== 200) {
-                        return this.$message({
-                            message: res.data.meta.msg,
+                })
+                    .then(res => {
+                        // console.log(res.data)
+                        if (res.data.meta.status !== 200) {
+                            return this.$message({
+                                message: res.data.meta.msg,
+                                type: 'error',
+                                duration: 1000,
+                            })
+                        }
+                        this.$message({
+                            message: '修改用户角色成功',
+                            type: 'success',
+                            duration: 1000,
+                        })
+
+                        this.getUserList()
+                    })
+                    .catch(err => {
+                        if (err.code === 'ERR_NETWORK') {
+                            return this.$message({
+                                message: '网络错误，请检查网络后重试',
+                                type: 'error',
+                                duration: 1000,
+                            })
+                        }
+                        this.$message({
+                            message: err.message,
                             type: 'error',
                             duration: 1000,
                         })
-                    }
-                    this.$message({
-                        message: '修改用户角色成功',
-                        type: 'success',
-                        duration: 1000,
                     })
-
-                    this.getUserList()
-                })
             },
         },
         created() {

@@ -8,6 +8,11 @@ import router from './router'
 import '@/assets/fonts/iconfont.css'
 // 全局样式
 import '@/assets/css/global.css'
+
+// 导入
+import ZkTable from 'vue-table-with-tree-grid'
+Vue.component('tree-table', ZkTable)
+
 // axios
 import axios from 'axios'
 // 配置请求的根路径
