@@ -13,9 +13,7 @@ body,
     margin-bottom: 25px;
 }
 
-/* ::-webkit-scrollbar {
-    display: none;
-} */
-body {
-    /* overflow-y: hidden; */
+/* 展开行对齐 */
+.el-table__expanded-cell {
+    padding-left: 50px !important;
 }

@@ -72,7 +72,7 @@
                             type="primary"
                             icon="el-icon-edit"
                             size="mini"
-                            @click="showEditDialog(scope.row)"
+                            @click="showEditDialog(scope.row, $event)"
                             round
                         >
                             编辑
@@ -83,7 +83,7 @@
                             type="danger"
                             icon="el-icon-delete"
                             size="mini"
-                            @click="deleteCate(scope.row)"
+                            @click="deleteCate(scope.row, $event)"
                             round
                         >
                             删除
@@ -387,7 +387,9 @@
 
             /* 编辑分类 */
             // 显示编辑对话框
-            showEditDialog(cate) {
+            showEditDialog(cate, event) {
+                // 阻止冒泡事件，防止点击按钮展开整行
+                event.stopPropagation()
                 this.editDialog = true
                 this.getCateName(cate.cat_id)
             },
@@ -454,7 +456,8 @@
             },
 
             /* 删除分类 */
-            deleteCate(cate) {
+            deleteCate(cate, event) {
+                event.stopPropagation()
                 this.$confirm('此操作将永久删除该分类, 是否继续?', '提示', {
                     confirmButtonText: '确定',
                     cancelButtonText: '取消',
@@ -486,6 +489,7 @@
                         this.$message({
                             type: 'info',
                             message: '已取消删除',
+                            duration: 1000,
                         })
                     })
             },

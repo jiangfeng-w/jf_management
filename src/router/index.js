@@ -44,6 +44,11 @@ const routes = [
                 name: 'categories',
                 component: () => import('@/components/Goods/Cate'),
             },
+            {
+                path: '/params',
+                name: 'params',
+                component: () => import('@/components/Goods/Params'),
+            },
         ],
     },
 ]
